@@ -649,7 +649,5 @@ def api_debug():
 
 # ── Startup ───────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    print('Customer Journey Dashboard -> http://localhost:5004')
-    print('Pre-computing analytics in background…')
-    threading.Thread(target=_precompute, daemon=True).start()
-    app.run(debug=False, port=5004)
+    port = int(os.environ.get('PORT', 5004))
+    app.run(host='0.0.0.0', port=port)
