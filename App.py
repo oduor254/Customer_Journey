@@ -147,10 +147,21 @@ def build_analytics(leads_df, shops_df, whatsapp_df=None):
     leads = leads[leads['phone_key'].str.len() >= 7].copy()
 
     shops['phone_key']     = shops['Phone'].astype(str).apply(normalize_phone)
-    shops['purchase_date'] = pd.to_datetime(shops['Date'], errors='coerce', dayfirst=True)
+    # Parse shop purchase dates using the same tolerant parser as leads
+    shops['purchase_date'] = shops['Date'].apply(parse_date)
     shops['Price']         = shops['Price'].apply(safe_float)
-    # Marketing expense column in shops
+    
+    # Marketing expense column in shops (try keyword match first, then column J by position)
     mkt_col = next((c for c in shops.columns if any(k in c.upper() for k in mkt_keywords)), None)
+    # Fallback: try to use column J (index 9) if it has numeric-like data
+    if not mkt_col and len(shops.columns) > 9:
+        col_j = shops.columns[9]
+        # Check if column J has numeric data
+        sample_vals = shops[col_j].astype(str).str.replace(',', '').str.replace('Ksh', '').str.replace('₦', '').str.strip()
+        if any(c.isdigit() for val in sample_vals.head(10) for c in str(val)):
+            mkt_col = col_j
+            print(f"⚠ Using column J ('{col_j}') as marketing expense (no keyword match found)")
+    
     shops['marketing_expense'] = shops[mkt_col].apply(safe_float) if mkt_col else 0.0
     
     # Combined global marketing spend from all rows BEFORE phone filtering
@@ -158,6 +169,7 @@ def build_analytics(leads_df, shops_df, whatsapp_df=None):
     
     if mkt_col: print(f"✓ Found marketing expense in shops column: '{mkt_col}'")
     if leads_mkt_col: print(f"✓ Found marketing expense in leads column: '{leads_mkt_col}'")
+    print(f"DEBUG: All shops columns: {list(shops.columns)}")
     
     shops = shops[shops['phone_key'].str.len() >= 7].copy()
 
@@ -281,6 +293,21 @@ def build_analytics(leads_df, shops_df, whatsapp_df=None):
         return '31+ Days'
 
     ttp_df['cat'] = ttp_df.apply(_ttp_cat, axis=1)
+
+    # --- Diagnostics: why many entries end up as 'Missing Date' ---
+    has_lead = ttp_df['lead_dt'].notna()
+    has_purch = ttp_df['first_purch'].notna()
+    both = int((has_lead & has_purch).sum())
+    only_lead = int((has_lead & ~has_purch).sum())
+    only_purch = int((~has_lead & has_purch).sum())
+    neither = int((~has_lead & ~has_purch).sum())
+    print(f"TTP diagnostics: converted_total={converted_count}, both={both}, only_lead={only_lead}, only_purchase={only_purch}, neither={neither}")
+    def _sample_index(idx, n=5):
+        return list(idx[:n])
+    print("TTP sample phones (both):", _sample_index(ttp_df[has_lead & has_purch].index))
+    print("TTP sample phones (only_lead):", _sample_index(ttp_df[has_lead & ~has_purch].index))
+    print("TTP sample phones (only_purchase):", _sample_index(ttp_df[~has_lead & has_purch].index))
+    print("TTP sample phones (neither):", _sample_index(ttp_df[~has_lead & ~has_purch].index))
 
     cat_counts  = ttp_df['cat'].value_counts().to_dict()
     valid_mask  = ttp_df['cat'].isin(['Same Day', '1-7 Days', '8-30 Days', '31+ Days'])
@@ -452,8 +479,6 @@ def build_analytics(leads_df, shops_df, whatsapp_df=None):
     elapsed = round(time.time() - t0, 1)
     print(f'✓ Analytics built in {elapsed}s')
 
-    overall_roi = round((total_revenue - total_marketing) / total_marketing * 100, 1) if total_marketing else 0.0
-    overall_cac = round(total_marketing / converted_count, 2) if converted_count else 0.0
     cost_per_lead = round(total_marketing / total_leads, 2) if total_leads else 0.0
 
     return {
@@ -464,15 +489,12 @@ def build_analytics(leads_df, shops_df, whatsapp_df=None):
             'converted_customers':       int(converted_count),
             'conversion_rate_pct':       float(conversion_rate),
             'engagement_to_conversion':  float(eng_to_conv),
-            'total_revenue':             float(round(total_revenue, 2)),
             'total_marketing_spend':     float(round(total_marketing, 2)),
-            'overall_roi_pct':           float(overall_roi),
-            'customer_acquisition_cost': float(overall_cac),
             'cost_per_lead':             float(cost_per_lead),
             'avg_customer_value':        float(round(avg_value, 2)),
             'repeat_customer_count':     int(repeat_count),
             'repeat_rate_pct':           float(repeat_rate),
-            'avg_days_to_purchase':      float(round(avg_days, 1)),
+            
         },
         'lead_status': {
             'hot_leads':   int(hot),
@@ -499,9 +521,9 @@ def build_analytics(leads_df, shops_df, whatsapp_df=None):
                 'repeat_purchase_rate_pct':  float(repeat_rate),
                 'avg_days_to_conversion':    float(round(avg_days, 1)),
                 'total_marketing_spend':     float(round(total_marketing, 2)),
-                'overall_roi_pct':           float(overall_roi),
-                'customer_acquisition_cost': float(overall_cac),
                 'cost_per_lead':             float(cost_per_lead),
+                'overall_marketing_roi_pct': float(round((total_revenue - total_marketing) / total_marketing * 100, 1) if total_marketing > 0 else 0.0),
+                'customer_acquisition_cost': float(round(total_marketing / converted_count, 2) if converted_count > 0 else 0.0),
             },
             'time_to_first_purchase': time_to_purchase_dist,
             'time_to_purchase_meta':  time_to_purchase_meta,
@@ -510,7 +532,6 @@ def build_analytics(leads_df, shops_df, whatsapp_df=None):
             'total_leads':      int(total_leads),
             'engaged_leads':    int(engaged_leads),
             'converted':        int(converted_count),
-            'revenue':          float(round(total_revenue, 2)),
             'avg_value':        float(round(avg_value, 2)),
             'engagement_rate':  float(engagement_rate),
             'conversion_rate':  float(conversion_rate),

@@ -47,7 +47,6 @@ print("\n📊 EXECUTIVE SUMMARY:")
 print(f"  Total Unique Leads: {summary.get('total_unique_leads', 0):,}")
 print(f"  Engaged Leads: {summary.get('engaged_leads', 0):,} ({summary.get('engagement_rate_pct', 0)}%)")
 print(f"  Converted: {summary.get('converted_customers', 0):,} ({summary.get('conversion_rate_pct', 0)}%)")
-print(f"  Revenue: {summary.get('total_revenue', 0):,.0f}")
 print(f"  Avg Customer Value: {summary.get('avg_customer_value', 0):,.2f}")
 
 status = analytics.get('lead_status', {})

@@ -282,11 +282,8 @@
       <div class="kpi c1 fade">   <span class="kpi-icon">&#x1F465;</span><div class="kpi-val" id="k-leads">&#x2014;</div><div class="kpi-lbl">Total Unique Leads</div></div>
       <div class="kpi c2 fade d1"><span class="kpi-icon">&#x1F4AC;</span><div class="kpi-val" id="k-engaged">&#x2014;</div><div class="kpi-lbl">Engaged <span id="k-engaged-pct" style="color:var(--purple);font-weight:700"></span></div></div>
       <div class="kpi c3 fade d2"><span class="kpi-icon">&#x1F6CD;</span><div class="kpi-val" id="k-converted">&#x2014;</div><div class="kpi-lbl">Converted <span id="k-converted-pct" style="color:var(--gold);font-weight:700"></span></div></div>
-      <div class="kpi c4 fade d3"><span class="kpi-icon">&#x1F4B0;</span><div class="kpi-val" id="k-revenue">&#x2014;</div><div class="kpi-lbl">Total Revenue</div></div>
       <div class="kpi c5 fade d4"><span class="kpi-icon">&#x1F504;</span><div class="kpi-val" id="k-repeat">&#x2014;</div><div class="kpi-lbl">Repeat Customers <span id="k-repeat-pct" style="color:var(--red);font-weight:700"></span></div></div>
-      <div class="kpi c1 fade d5"><span class="kpi-icon">&#x23F1;</span><div class="kpi-val" id="k-days">&#x2014;</div><div class="kpi-lbl">Avg Days to Purchase</div></div>
-      <div class="kpi c4 fade d5"><span class="kpi-icon">&#x1F4C8;</span><div class="kpi-val" id="k-roi">&#x2014;</div><div class="kpi-lbl">Overall ROI</div></div>
-      <div class="kpi c2 fade d5"><span class="kpi-icon">&#x1F3AF;</span><div class="kpi-val" id="k-cac">&#x2014;</div><div class="kpi-lbl">Acquisition Cost (CAC)</div></div>
+      
     </div>
   </section>
 
@@ -462,11 +459,7 @@ function render(data) {
     animCount(document.getElementById('k-leads'),     ex.total_unique_leads,   '',    '',    0);
     animCount(document.getElementById('k-engaged'),   ex.engaged_leads,        '',    '',    0);
     animCount(document.getElementById('k-converted'), ex.converted_customers,  '',    '',    0);
-    animCount(document.getElementById('k-revenue'),   ex.total_revenue,        'Ksh ', '', 0);
     animCount(document.getElementById('k-repeat'),    ex.repeat_customer_count,  '',    '',    0);
-    animCount(document.getElementById('k-days'),      ex.avg_days_to_purchase, '',    'd',   1);
-    animCount(document.getElementById('k-roi'),       ex.overall_roi_pct,      '',    '%',   1);
-    animCount(document.getElementById('k-cac'),       ex.customer_acquisition_cost, 'Ksh ', '', 0);
 
     if (document.getElementById('k-engaged-pct'))   document.getElementById('k-engaged-pct').textContent   = '(' + (ex.engagement_rate_pct || 0).toFixed(1) + '%)';
     if (document.getElementById('k-converted-pct')) document.getElementById('k-converted-pct').textContent = '(' + (ex.conversion_rate_pct || 0).toFixed(1) + '%)';

@@ -42,10 +42,8 @@ print(f"  Total Unique Leads: {summary.get('total_unique_leads', 0):,}")
 print(f"  Engaged Leads: {summary.get('engaged_leads', 0):,} ({summary.get('engagement_rate_pct', 0)}%)")
 print(f"  Converted Customers: {summary.get('converted_customers', 0):,} ({summary.get('conversion_rate_pct', 0)}%)")
 print(f"  Engagement→Conversion: {summary.get('engagement_to_conversion_pct', 0)}%")
-print(f"  Total Revenue: {summary.get('total_revenue', 0):,.0f}")
 print(f"  Avg Customer Value: {summary.get('avg_customer_value', 0):,.2f}")
 print(f"  Repeat Customers: {summary.get('repeat_customer_count', 0):,} ({summary.get('repeat_rate_pct', 0)}%)")
-print(f"  Avg Days to Purchase: {summary.get('avg_days_to_purchase', 0)}")
 
 # Display lead status
 status = analytics.get('lead_status', {})

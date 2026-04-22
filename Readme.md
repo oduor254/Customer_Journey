@@ -1,3 +1,31 @@
+# Customer Journey
+
+Brief analytics utilities and templates for customer journey analysis.
+
+Project files:
+
+- `App.py` - main application
+- `diagnose_data.py`, `debug_marketing.py`, `check_mkt_col.py` - diagnostics and helpers
+- `templates/Index.html` - HTML template
+- `Requirements.txt` - Python dependencies
+
+Getting started
+
+1. Create a virtual environment and install dependencies:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r Requirements.txt
+```
+
+2. Run the app (adjust as needed):
+
+```powershell
+python App.py
+```
+
+License: Add a license file if you plan to publish this repository.
 # Customer Journey Dashboard 2025
 
 A Flask + HTML/CSS/JS dashboard that analyses your customer journey from
